@@ -1,0 +1,40 @@
+
+public class VecrtorIslemleri : MonoBehaviour
+{
+    // Vector2 -> x,y
+    // Vector3 -> x,y,z
+    // Vector4 -> x,y,z,w
+
+
+    // Vector3 tanımlama
+    Vector3 _Pozisyon;
+
+    public Vector3 _DisaridanPozisyonum;
+
+    public float x, y, z;
+
+    void Start()
+    {
+        //  _Pozisyon = new Vector3(4.2f, 6.5f, 3.2f);
+
+        // scriptin bağlı olduğu objenin pozisyonunun almak için
+        //transform.position = new Vector3(4.2f,6.5f,3.2f);
+        // transform.position = _Pozisyon;
+        // transform.position = _DisaridanPozisyonum;
+        // transform.position = new Vector3(x, y, z);
+
+
+        // Mevcut pozisyonu koru direğlerini değiştir
+        // transform.position = new Vector3(transform.position.x, y, z);
+
+        // Mevcut pozisyonun üzerine benim vermiş olduğum pozisyonu ekleme
+        // 1. kullanım uzun işlem
+        transform.position = new Vector3(transform.position.x + x, transform.position.y + y, transform.position.z + z); 
+
+        // 2. kullanım kısa işlem
+        transform.position += new Vector3(x, y, z); 
+
+        // !!!!!! YAPILAMAZ OLAN !!!!!!!!
+       // transform.position.y = 4f; // BUNA İZİN VERİLMEZ
+    }
+}
