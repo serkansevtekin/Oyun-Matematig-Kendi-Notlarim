@@ -1,0 +1,152 @@
+/*
+====================================================================
+SignedAngle Vector
+====================================================================
+
+    SIGNED ANGLE NEDİR?
+    ------------------
+        İki vektör arasındaki açıyı HEM büyüklük hem yön bilgisiyle verir
+
+        Vector3.Angle   ->  0° - 180° (sadece miktar)
+        Vector3.SignedAngle -> -180° ile + 180° (miktar + yön)
+
+        Pozitif değer   -> Saat yönünün tersine dönüş
+        Negatif değer   -> Saat yönünde dönüş
+
+        (Bu, veriler eksene bağlıdır)
+    
+    ----------------------------------------------------------------
+    MATEMATİKSEL MANTIK
+    ----------------------------------------------------------------
+
+        SignedAngle iç yapısında şunları yapar:
+
+                1) Dot -> cosθ (açı büyüklüğü)
+                2) Cross -> dönüş yönü
+                3) atan2(sinθ, cosθ) -> işaretli açı
+
+        Temel Fikir:
+                    sinθ = |cross|
+                    cosθ = dot
+
+                    angle = atan2(sinθ, cosθ)
+    
+    ----------------------------------------------------------------
+    PARAMETRELER
+    ----------------------------------------------------------------
+
+            Vector3.SignedAngle(from, to , axis)
+
+            from -> başlangıç yönü
+            to   -> hedef yön
+            axis -> hangi eksene göre açı ölçülecek?
+
+                Genelde: 
+                        transform.up (Y ekseni için)
+                        transform.right
+                        transform.forward
+
+
+    ----------------------------------------------------------------
+    OYUNLARDA KULLANIM
+    ----------------------------------------------------------------
+
+            -> Karakter hangi yöne kaç derece dönmeli?
+            -> Kamera yatay dönüş farkı
+            -> Aim sistemi
+            -> Steering davranışı
+            -> 360° yön sınıflandırma
+
+    ====================================================================
+    PERFORMANS NOTU
+    --------------------------------------------------------------------
+
+        SignedAngle, Angle'den çok daha pahalıdır.
+        Çünkü:
+            - Dot
+            - Cross
+            - atan2
+            işlemlerini birleştirir.
+
+        Eğer sadece:
+                - Yön gerekiyorsa -> Cross
+                - Miktar gerekiyorsa -> Dot
+                - Derece (açı) gerekiyorsa -> Angle
+                - İkiside birden gerekiyorsa -> SignedAngle
+
+====================================================================
+
+*/
+public class SignedAngle_Vector : MonoBehaviour
+{
+    public Transform _objeA;
+    public Transform _objeB;
+
+    void Update()
+    {
+        if (_objeA == null || _objeB == null) return;
+
+        Vector3 forward = _objeA.forward;
+        Vector3 diff = _objeB.position - _objeA.position;
+
+        if (diff.sqrMagnitude < 0.001f) return;
+
+        Vector3 directionToB = diff.normalized;
+
+
+        // 1) Unity hazır SignedAngle
+        float signedAngle = Vector3.SignedAngle(forward, directionToB, _objeA.up);
+        Debug.Log("Signed Angle: " + signedAngle + "°");
+
+
+
+
+        // 2) SignedAngle Manuel Mantık (Dot + Cross + Atan2)
+        float dot = Vector3.Dot(forward, directionToB);
+        Vector3 cross = Vector3.Cross(forward, directionToB);
+
+        float signedSin = Vector3.Dot(cross, _objeA.up);
+        float manuelSignedAngle = Mathf.Atan2(signedSin, dot) * Mathf.Rad2Deg;
+
+        Debug.Log("Manuel Signed Angle: " + manuelSignedAngle + "°");
+
+
+
+
+
+        // 3) Karar mekanizması
+        if (signedAngle > 0)
+            Debug.Log("SOLA dönülmeli");
+        else if(signedAngle < 0)
+             Debug.Log("SAĞA dönülmeli");
+        else
+             Debug.Log("Tam ön doğrultuda");
+
+
+
+
+
+
+        // 4) Hassas dönüş örneği
+        if (Mathf.Abs(signedAngle) > 5f)
+        {
+             Debug.Log("Dönüş gerekli");
+        }
+
+
+
+
+
+        // 5) 360° sınıflandırma örneği
+        if (signedAngle > 90f)
+             Debug.Log("SOL ARKA bölge");
+        else if(signedAngle >0f)
+             Debug.Log("SOL ÖN bölge");
+        else if(signedAngle < -90f)
+             Debug.Log("SAĞ ARKA bölge");
+        else if(signedAngle < 0f)
+             Debug.Log("SAĞ ÖN bölge");
+
+
+    }
+}
