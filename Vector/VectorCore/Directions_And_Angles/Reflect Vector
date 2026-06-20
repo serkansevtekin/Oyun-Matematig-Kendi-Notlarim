@@ -1,0 +1,116 @@
+
+====================================================================
+Reflect Vector
+====================================================================
+
+    REFLECT NEDİR?
+    ------------------------
+        Bir vektörün vir yüzeye çarpıp geri yansımasıdır.
+
+        Formül: R = I - 2 * Dot(I, N) * N
+
+        I -> gelen vektör (incident)
+        N -> yüzey normali (plane normal)
+        R -> yansıyan vektör (reflected)
+
+        OYUNLARDA KULLANIM
+        --------------------
+                -> Top, mermi veya ışık yansıması
+                -> Fizik tabanlı çarpışmalar
+                -> Reflektif efektler
+                -> Raycast yansımaları
+                -> Zıplama veya bounce mekaniği
+
+    ====================================================================
+    MATEMATİKSEL MANTIK
+    --------------------------------------------------------------------
+            1) Dot(I,N) -> yüzeye dik bileşen
+            2) 2 * Dot(I,N) * N -> dik bileşeni iki kat tersine al
+            3) I - (...) -> geri yansıyan vektör
+
+            İpucu:
+                - Yüzey düz ise: normal normalize edilmeli
+                - Yansıma açısı = gelme açısı (physics principle)
+    
+    ====================================================================
+    PERFORMANS
+    --------------------------------------------------------------------
+        Vector3.Reflect hazır fonksiyon hızlıdır
+        Manuel hesap Dot ve birkaç çarpma ile yapılır
+    ====================================================================
+    */
+
+
+public class Reflect_Vector : MonoBehaviour
+{
+
+    // AMAÇ VEKTÖR MATEMATİĞİNİ GÖRMEK
+    public Transform _objA;     // Gelen vektör
+    public Transform _surfaceRef; // Yüzey normal referansı
+
+    void Update()
+    {
+        if (_objA == null || _surfaceRef == null) return;
+
+
+        // 1) Gelen vektör (örnek: hız veya ışık)
+        Vector3 incomming = _objA.forward * 5f;
+
+        // 2) Yüzey normali
+        Vector3 normal = _surfaceRef.up.normalized;
+
+        // 3) Unity hazır fonksiyon
+        Vector3 reflectedUnity = Vector3.Reflect(incomming, normal);
+        Debug.Log("Reflected (unity): " + reflectedUnity);
+
+        // 4) Reflected Manuel Hesaplama (Alt yapıyı bilmek için)
+        float dot = Vector3.Dot(incomming, normal);
+        Vector3 refelectedManual = incomming - 2f * dot * normal;
+        Debug.Log("Reflected (Manual): " + refelectedManual);
+
+    }
+
+    // Görselleşrtirme için gizmos [vektör matematiğini görmek]
+
+    void OnDrawGizmos()
+    {
+        if (_objA == null) return;
+        Vector3 origin = _objA.position;
+        Vector3 direction = _objA.forward;
+        float distance = 10f;
+
+        Ray ray = new(origin, direction);
+        RaycastHit hit;
+
+        // Raycast at
+        if (Physics.Raycast(ray, out hit, distance))
+        {
+            Vector3 incomming = direction * hit.distance;
+
+            // Çarpılan yüzeyin gerçek normali
+            Vector3 normal = hit.normal;
+
+            // Yansıma
+            Vector3 reflected = Vector3.Reflect(direction, normal);
+
+            // Gelen Ray
+            Gizmos.color = Color.blue;
+            Gizmos.DrawRay(origin, incomming);
+
+            // Normal (çarpışma noktasından)
+            Gizmos.color = Color.red;
+            Gizmos.DrawRay(hit.point, normal * 3f);
+
+            // Yansıyan (Reflect)
+            Gizmos.color = Color.green;
+            Gizmos.DrawRay(hit.point, reflected * 5f);
+        }
+        else
+        {
+            // Hiçbir şeye çarpmazsa sadece düz ray çiz
+            Gizmos.color = Color.black;
+            Gizmos.DrawRay(origin, direction * distance);
+        }
+
+    }
+}
