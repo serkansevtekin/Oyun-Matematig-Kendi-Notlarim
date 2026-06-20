@@ -1,0 +1,114 @@
+
+/*
+====================================================================
+MoveTowards
+====================================================================
+
+    MOVETOWARDS NEDİR?
+    ------------------------
+        Bir noktadan diğerine SABİT HIZLA ileri
+
+        Lerp'ten farkı:
+                    - Lerp oran bazlıdır (t)
+                    - MoveTowards mesaf bazlıdır (unitys per freame)
+
+        Formül:
+
+                direction = (target - current).normalized
+                result = current + direction * maxDistenceDelta
+
+        Eğer hedefe kalan mesafe maxDistanceDelta'dan küçük se hedef direkt oturur.
+        Overshoot yapmaz.
+
+    
+        --------------------------------------------------------------------
+        PARAMETRE
+        --------------------------------------------------------------------
+
+            Vector3.MoveTowards(current, target, maxDistanceDelta)
+
+            maxDistanceDelta:
+                        -> Bu frame'de maksimum kaç unit ilerleyeceği.
+
+            Sabit hız için:
+                        -> maxDistanceDleta = speed * Time.deltaTime;
+
+        --------------------------------------------------------------------
+        OYUNLARDA KULLANIM
+        --------------------------------------------------------------------
+
+            -> Sabit hızla karakter yürütme
+            -> Mermi ilerlemesi
+            -> Kamera sabit hız takibi
+            -> Lerp yerine deterministik hareket
+
+
+
+        --------------------------------------------------------------------
+        PERFORMANS
+        --------------------------------------------------------------------
+
+            İçeride:
+                    - Subtraction
+                    - Mahnitude
+                    - Normalize
+                    Orta seviye maliyetlidir
+====================================================================
+*/
+public class MoveTowardsVector : MonoBehaviour
+{
+
+    void Update()
+    {
+        BasiUse();
+    }
+
+    public Transform _start;
+    public Transform _target;
+    public float speed = 5f;
+    void BasiUse()
+    {
+        if (_start == null || _target == null) return;
+
+        Vector3 current = _start.position;
+        Vector3 targetPos = _target.position;
+
+        float step = speed * Time.deltaTime;
+        Vector3 result = Vector3.MoveTowards(current, targetPos, step);
+        _start.position = result;
+
+        Debug.Log("Current Position: " + result);
+
+
+        // Görselleştirme
+        Debug.DrawLine(current, targetPos, Color.gray);
+
+    }
+
+    void MoveTowardsBackground()
+    {
+        Vector3 diff = _target.position - _start.position;
+
+        // Bir kez hesaplayıp değişkene atalım
+        float sqrLen = diff.sqrMagnitude;
+
+
+        // 1. GÜVENLİK: Eğer zaten hedefe çok yakınsak (0.0001f) işlem yapma
+        if (sqrLen < 0.0001f) return;
+
+        float step = speed * Time.deltaTime;
+
+        // 2. HAREKET MANTIĞI
+        if (sqrLen > step * step)
+        {
+            // Artık gönül rahatlığıyla normalize edebiliriz
+            Vector3 manual = _start.position + diff.normalized * step;
+            
+            Debug.Log("Manual Move: " + manual);
+        }
+        else
+        {
+            Debug.Log("Reached Target");
+        }
+    }
+}
