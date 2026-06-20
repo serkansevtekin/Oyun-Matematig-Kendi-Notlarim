@@ -1,0 +1,102 @@
+using UnityEngine;
+/*
+===========================================================
+TRIG_ASIN_ACOS.cs
+===========================================================
+    Asin, Acos ve Atan fonksiyonları genelde matematiksel referans veya özel açı hesapları için kullanılır.
+    Atan2 çoğu zaman bunların yerini alır.
+    Bu dosya sadece kısa referans ve örnek amaçlıdır.
+
+    -> Asin: sin değerinden açı → y / hipotenüs
+    -> Acos: cos değerinden açı → x / hipotenüs
+    -> Atan: slope (rise/run) → tek başına yeterli değil, çeyrekler doğru olmayabilir → Atan2 tercih edilir
+
+
+    Çok doğru bir mimari:
+                        -> Sin / Cos  → hareket üretme
+                        -> Tan        → slope mantığı
+                        -> Atan2      → yön ve açı hesaplama
+                        -> Asin/Acos  → referans trigonometrik fonksiyonlar
+        Bu zaten oyun matematiğinin %90’ını kapsar.
+*/
+public class Trig_Atan_Acos_Asin : MonoBehaviour
+{
+    [Header("Örnek değerler")]
+    [Range(0, 1)]
+    public float ratio = 0.5f; // sin, cos veya slope oranı
+    public float rise = 2f;
+    public float run = 5f;
+
+    void Start()
+    {
+        // AsinKullanim();
+        // AcosKullanım();
+        AtanKullanim();
+    }
+
+    #region Asin Örneği
+    /*
+        Asin = arcsin, sin değerinden açı bulur
+        Çıkış radyan, gerekirse Mathf.Rad2Deg ile dereceye çevir
+        Kullanım:
+                y / hipotenüs
+    */
+
+    private void AsinKullanim()
+    {
+        float angleRadianAsin = Mathf.Asin(ratio);
+        float angleDegreeAsin = angleRadianAsin * Mathf.Rad2Deg;
+        Debug.Log("Asi(ratio = " + ratio + ") = " + angleDegreeAsin + "°");
+    }
+
+    #endregion
+
+    #region  Acos Örneği
+    /*
+        Acos = arccos, cos değerinden açı bulur
+        Çıkış radyan, gerekerise Mathf.Rad2Deg ile dereceye çevir
+        Kullanım:
+                x / hipotenüs
+
+        NOT:
+            Acos bazı oyun sistemlerinde dot product ile birlikte kullanılır:           
+
+                    angle = acos( dot(a,b) )            
+
+            Bu yöntem vektörler arasındaki açıyı bulur.         
+
+            Ancak çok sık çağrıldığında maliyet artabilir.
+            Bu yüzden oyun motorlarında genelde şu alternatifler tercih edilir:         
+
+                    -> Vector3.Angle()
+                    -> Vector3.Dot()
+                    -> Mathf.Atan2()
+
+
+    */
+    private void AcosKullanım()
+    {
+        float angleRadianAcos = Mathf.Acos(ratio);
+        float angleDegreeAcos = angleRadianAcos * Mathf.Rad2Deg;
+
+        Debug.Log($"Acos(ratio = {ratio}) = {angleDegreeAcos}°");
+    }
+    #endregion
+
+    #region Atan Örneği
+    /*
+        Atan = rise / run (slope) değerlerinden açı bulur
+        Çıkış radyan, gerekirse dereceye çevir
+        Basit slope hesapları için kullanılabilir
+        Ama tüm çeyreklir kapsama, atan2 daha güvenlidir
+    
+    */
+    private void AtanKullanim()
+    {
+        float slope = rise / run;
+        float angleRadianAtan = Mathf.Atan(slope);
+        float angleDegreeAtan= angleRadianAtan * Mathf.Rad2Deg;
+        Debug.Log($"Atan(ris/run= {slope}) = {angleDegreeAtan} °");
+    }
+    #endregion
+}
