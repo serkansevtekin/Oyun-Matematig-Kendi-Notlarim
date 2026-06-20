@@ -1,0 +1,86 @@
+/*
+
+====================================================================
+VectorUtils
+====================================================================
+
+        BU DOSYA NE İÇİN?
+        ------------------
+            Vector3 ile sık kullanılan yardımcı fonksiyonları gösterir:
+
+                    - Max, Min
+                    - Equals
+                    - ClampMagnitude
+
+        Bu fonksiyonlar genelde tek satır ile kullanılır ve mantığı basittir.
+        Oyun matematiğinde sık tekrar edilir, kısa hızlı referans içindir.
+*/
+public class VectorUtils : MonoBehaviour
+{
+
+    public Transform _objA;
+    public Transform _objB;
+
+    void Update()
+    {
+        if (_objA == null || _objB == null) return;
+
+        Vector3 a = _objA.position;
+        Vector3 b = _objB.position;
+
+        // ------------------------------------------------------------
+        // 1) Max & Min
+        // Element bazlı karşılaştırma
+        Vector3 maxVector = Vector3.Max(a, b);
+        Vector3 minVector = Vector3.Min(a, b);
+
+        Debug.Log("Max vector: " + maxVector);
+        Debug.Log("Min vector: " + minVector);
+
+
+        // ------------------------------------------------------------
+        // 2) Equals ve (==)
+        // Vektörlerin eşit olup olmadığını kontrol eder
+        bool isEqual = a.Equals(b);
+        bool isEqualOperator = a == b;
+
+        Debug.Log("Equals(): " + isEqual);
+        Debug.Log("== Operator: " + isEqualOperator);
+
+
+        // ------------------------------------------------------------
+        // 3) ClampMagnitude
+        // Eğer amacın sadece bir vektörün boyunu kontrol altında tutmaksa, ClampMagnitude doğrudan
+        // .magnitude nin clamp yapabilen hali 
+        // ClampMagnitude: Sadece gerekirse (sınır aşılırsa) karekök alır (Daha optimize).
+        Vector3 orginal = (b - a) * 2f; // örnek vektör
+        Vector3 clamped = Vector3.ClampMagnitude(orginal, 5f);
+
+        Debug.Log("Original Vector: " + orginal);
+        Debug.Log("Clamped Vector (max 5 units): " + clamped);
+
+        // Açıklama:
+        // - Eğer orginal.magnitude > 5 -> normalize edip 5 ile çarpar
+        // - Eğer orginal.magnitude <= 5 -> değişmez
+
+        /// Örnek kullanım: Diyelim ki oyuncun bir noktaya kanca attı (Point A) ve kendisi hareket ediyor (Point B). Halatın 5 metreden fazla uzamasını istemiyorsan kullanılır.
+
+
+
+        // ------------------------------------------------------------
+        // 4) Vector3.Scale (Bileşen Bazlı Çarpım)
+        // ------------------------------------------------------------
+        Vector3 aPos = _objA.position;
+        Vector3 mask = new Vector3(1f, 0f, 1f); // Y eksenini sıfırlayan maske
+        Vector3 scaledPos = Vector3.Scale(aPos, mask);
+
+        /*
+            Mantık: aPos.x * mask.x, aPos.y * mask.y, aPos.z * mask.z
+            Kullanım: Bir vektörün belirli eksenlerini korumak veya farklı oranlarda büyütmek 
+            Örn:
+                Sadece yatay düzlemdeki hızını almak
+        */
+        Debug.Log("Scaled (Y flattened): " + scaledPos.y); // y => 0.92
+
+    }
+}
