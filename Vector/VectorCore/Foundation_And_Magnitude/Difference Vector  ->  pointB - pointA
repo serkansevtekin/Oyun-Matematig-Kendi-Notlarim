@@ -1,0 +1,51 @@
+/*
+    Difference Vector  ->  pointB - pointA;
+    ---------------------------------------------------
+        Amaç: İki vektör arasındaki farkı (differece) hesaplamak.
+              Fark vektörü, bir vektörden diğerine gitmek için gerekli yön ve büyüklük verir.
+              Oyun matematiğinde pozisyon farklarını, hareket yönlerini veya mesafeyi hesaplamak için kulanılır.
+
+        
+        Konular:
+                - Vektör farkı (Difference)
+                - Basit pozisyon hesaplaması
+                - Fark vektörünü normalize ederek yön elde etme
+                - Magnitude kullanarak uzaklığı bulma
+*/
+
+public class Diff_Vector : MonoBehaviour
+{
+
+    // Örnek iki nokta
+    public Vector3 pointA = new Vector3(1, 0, 1);
+    public Vector3 pointB = new Vector3(4, 0, 5);
+
+    void Start()
+    {
+        // 1. Fark vektrü: B'den A'ya gitmek için gereken vektör
+        Vector3 diff = pointB - pointA;
+        Debug.Log("Fark vektörü (pointB - pointA): " + diff);
+
+
+
+        // 2. Fark vektürünün büyüklüğü (mesafe)
+        float distance = diff.magnitude;
+        Debug.Log("Mesafe (magnitude): " + distance);
+
+
+
+        // 3. Yön vektörü (normalized)
+        Vector3 direction = diff.normalized;
+        Debug.Log("Yön vektörü (normalized): " + direction);
+
+
+
+        // 4. Uzaklığı tekrar kontrol etmek için Vector3.Distance
+        float distance2 = Vector3.Distance(pointA, pointB);
+        Debug.Log("Vector3.Distance ile mesafe: "+ distance2);    
+    
+    
+
+    }
+
+}
