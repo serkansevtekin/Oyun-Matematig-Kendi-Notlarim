@@ -1,0 +1,171 @@
+using UnityEngine;
+
+public class VectorIslemleri3 : MonoBehaviour
+{
+    public Transform _Obj1;
+    public Transform _Obj2;
+
+
+
+    void Start()
+    {
+
+    }
+
+    void Update()
+    {
+        /* // Vektör Hizalama ve Optimizasyon: Angle vs. Dot Product 
+        
+         // Angle -> İki vektör arasında derece cinsinden açıyı döndürür (0 ile 180 derece arası) [ Dot ile daha Performanslı Hali yazılır]
+         Vector3 Poz = _Obj1.position - transform.position;
+         float Aci = Vector3.Angle(Poz, transform.forward);
+
+         if (Aci < 5f)
+             Debug.Log("Açı azaldı: " + Aci);
+         else
+           Debug.Log("Açı : " + Aci); 
+
+
+        // Neden Dot? 
+           "Çünkü bilgisayar için Acos ve Radyan->Derece dönüşümü yapmak (Angle), sadece iki sayıyı çarpıp toplama yapmaktan (Dot) çok daha maliyetlidir.  Angle insanlar içindir, Dot işlemciler içindir."
+
+
+     //**************************************************************************
+
+        // Performanslı hali (DOT ile)
+        // Birim Çember (Unit Circle) ve Kosinüs
+
+        Vector3 Yon = (_Obj1.position - transform.position).normalized;
+        float dot = Vector3.Dot(Yon, transform.forward);
+
+        // DOT BURADA AÇI HESAPLAMAZ! 
+        // Sadece iki vektörün birbiriyle ne kadar örtüştüğüne bakar.
+        // transform.forward = 1 birim olduğundan, sonucun 1'e yakınlığına bakarak 
+        // "ne kadar aynı yöne bakıyoruz" testini yapar.
+        // 5 dereceye denk gelen kosinüs değeri yaklaşık 0.996'dır.
+        // Eğer dot 0.996'dan BÜYÜKSE, açı 5 dereceden KÜÇÜKTÜR.
+        if (dot > 0.996)
+            Debug.Log("Açı azaldı: " + dot);
+        else
+            Debug.Log("Açı : " + dot); 
+
+
+            Örnek: 
+                    | Dot Değeri | Yaklaşık Açı | Durum                       |
+                    | ---------- | ------------ | --------------------------- |
+                    | 1.0        | 0°           | Tam Üstüne Bakıyor (Sniper) |
+                    | 0.99       | ~8°          | Çok Dar Açı (Ateş Et!)      |
+                    | 0.70       | 45°          | Geniş Açı (Takibi Sürdür)   |
+                    | 0.0        | 90°          | Yan Yan Geçiyor             |
+                    | -1.0       | 180°         | Tam Arkanda                 |
+
+
+    */
+
+        /*// Lerp -> İki nokta arasında doğrusal bir interpolasyon sağlar
+                  -> İki değer arasında yumşak bir geçiş sağlar (0 (başlangıç) ile 1 (bitiş) arası oranla çalışır)
+
+            Formül: a + (b - a) * t
+            
+            Kritik Not:
+                        EĞer 0.1f gibi sabit bir değer veirrsen, her karede frame mesafesinin %10'u kadar yaklaşır. Buda hareketin doğru yavaşlamasını sağlar (Buna: "Ease-Out" denir)
+        
+            Lerp(Başlangıç, Hedef, Oran);
+                                       -> Başlangıç (A): İşlemin başladığı mevcut değer veya konum (Örn: transform.position).
+                                       -> Hedef (B): Ulaşılmak istenen son değer veya nokta (Örn: dusman.position).
+                                       -> Oran (t): İki nokta arasındaki yolun yüzde kaçında olduğun (0 ile 1 arası değer).
+                                       -> Time.deltaTime: Oranla çarpıldığında, geçişi kare hızından (FPS) bağımsız ve akıcı yapar.
+   
+   
+   
+   1- Örnek Kullanım:
+     public Transform _Obj1;  // Hedef obje
+    public float targetTime; // hedef süre
+    private float elapsedTime; // Geçen süre
+    private Vector3 startPos; // Başlangıç pozisyonu
+
+    void Start()
+    {
+        startPos = transform.position; // Oyun başladığında bulunduğumuz konumu bir vektör olarak kaydediyoruz
+        Debug.Log(startPos);
+    }
+    
+    void Update()
+    {
+          // elapsedTime (Geçen Süre) hedeflediğimiz süreden küçük olduğu sürece çalış:
+        if (elapsedTime < targetTime)
+        {
+            // Her karede geçen süreyi üzerine ekle (Kronometre gibi)
+            elapsedTime += Time.deltaTime;
+
+            // Yüzde hesabı: Geçen Süre / Hedef Süre (0 ile 1 arası bir değer üretir)
+            float percentage = elapsedTime / targetTime;
+
+            // Start'ta kaydettiğimiz noktadan, hedefe, yüzdeye göre kaydır.
+            transform.position = Vector3.Lerp(startPos, _Obj1.position, percentage);
+        }
+
+     
+    }
+
+     //**************************************************************************
+
+2. Ornek Kullanım:
+        trasnform.position = Vector3.Lerp(transform.position, _Obj1.position, 5f * Time.deltaTime);
+
+
+
+*********************************************************************************************************************************************
+
+    Kısa Özet Notun:
+                -> Lerp(startPos, target, percentage): 
+                                                Bir noktadan bir noktaya, belirli bir SÜREDE gitmek içindir. (tam oturur)
+
+                -> Lerp(transform.position, target, speed * Time.deltaTime): 
+                                                                        Hareketli bir hedefi YUMUŞAKÇA TAKİP etmek içindir.
+        */
+
+
+        /* // Slerp
+       // Slerp(A, B, t) -> A noktasından B noktasına dönerek (açısal) gider. Eğer bir "Merkez" noktasına göre hesaplanırsa, ortaya yay (kavis) hareketi çıkar. 
+
+       Kullanım alanları:
+                        -> Havan Topu veya Bomba Atışı (Parabolik Hareket)
+                        -> Gezegen veya Uydu Yörüngesi
+                        -> Yumuşak Kule ve Kamera Dönüşleri (Açısal Geçiş)
+                        -> Trajectory Prediction (angry birds atıştan önceki çizgi)
+
+       Örnek Kullanım:
+                float targetTime = 2f;
+                float elapsedTime = 0f;
+
+
+                 void Update()
+                 {
+                    if (elapsedTime < targetTime)
+                  {
+                      elapsedTime += Time.deltaTime; // Süreyi sayıyoruz
+                      float percentage = elapsedTime / targetTime; // 0'dan 1'e giden oran
+
+                      // Hocanın Merkez Hesaplamaları (Evrensel)
+                      Vector3 Merkez = (_Obj1.position - _Obj2.position) * 0.5f;
+                      Merkez -= Vector3.up * 2f; // Kavisin yüksekliğini belirler
+
+                      Vector3 YukselisMerkezi = _Obj1.position - Merkez;
+                      Vector3 VarisMerkezi = _Obj2.position - Merkez;
+
+                      // BURASI KRİTİK: Time.deltaTime yerine 'percentage' kullanıyoruz
+                      transform.position = Vector3.Slerp(YukselisMerkezi, VarisMerkezi, percentage);
+                      transform.position += Merkez;
+                 }
+       // */
+
+
+    
+
+
+
+
+
+    }
+}
