@@ -1,0 +1,135 @@
+
+/*
+====================================================================
+ProjectOnPlane Vector.cs
+====================================================================
+
+    PROJECT ON PLANE NEDİR?
+    ------------------------
+        Bir vektör bir düzleme "düşürmek".
+        Yani:
+            Vektörün düzleme dik bileşeni çıkartılır
+            Düzlem üzerinde kalan bileşen elde edilir.
+
+       FORMÜL
+    ------------------------
+        planeNormal → düzlemin normali (perpendicular)
+        v          → projekte edilecek vektör
+
+        ProjectOnPlane(v, planeNormal) = v - Project(v, planeNormal)
+                                        = v - (Dot(v, planeNormal)/|n|²) * n
+
+        Eğer normal normalize ise:
+            ProjectOnPlane(v, n) = v - Dot(v, n) * n
+
+
+    OYUN MANTIĞI
+    --------------
+        -> Karakterin yatay hızını bulmak
+        -> Eğime paralel hareketi hesaplamak
+        -> Yüzeyde sürtme ve kaymayı ayırmak
+        -> Yerçekimine dik bileşeni kaldırmak 
+
+
+    ====================================================================
+    KOD AÇIKLAMALARI
+    --------------------------------------------------------------------   
+        
+        1) Vector3.ProjectOnPlane(a, planeNormal)
+                    - Unity hazır fonksiyon
+                    - Düzlem paralel bileşeni verir
+        
+        2) Fiziksel kullanım
+                    - Rigidbody.linearVelocity üzerinde
+                    - Plane = Vector3.up -> yatay hız
+
+*/
+
+public class ProjectOnPlane_Vector : MonoBehaviour
+{
+    [Header("1. YÖNTEM: TEMEL MATEMATİK ")]
+    public Transform _objA;     // Vekötrü gönderdiğimiz kaynak
+    public Transform _planeRef; // Düzlemin referansı
+
+    [Header("2. YÖNTEM: GERÇEK DÜNYA (Raycast)")]
+    public LayerMask groundLayer;
+    public float rayDistance = 2f;
+    public float speed = 2f;
+
+    private Vector3 _mathProjected; // Matematiksel sonuç
+    private Vector3 _physicProjected; // Fiziksel (Yokuş) sonuç
+
+
+    void Update()
+    {
+        // SENİN METODUNU ÇALIŞTIRALIM
+        // TemelMatematikselKullanım();
+
+
+        // GERÇEK DÜNYA ÖRNEĞİNİ ÇALIŞTIRALIM
+        FizikselYuzeyAnalizi();
+
+    }
+
+    // Eğimli Yüzey Hareket Sistemi 
+    private void FizikselYuzeyAnalizi()
+    {
+
+        // Tam karakterin altındaki gerçek yüzeyi bulur
+        RaycastHit hit;
+        Vector3 groundNormal = Vector3.up; // Varsayılan yukarı
+
+        if (Physics.Raycast(transform.position, Vector3.down, out hit, 2f, groundLayer))
+        {
+
+            groundNormal = hit.normal; // Rampanın gerçek açısın aldık
+
+        }
+        // ileri gitme isteğimizi, bastığımız yüzeye göre projecte ediyoruz
+        Vector3 inputDir = new Vector3(0, 0, 1);
+        Vector3 slopeMoveDir = Vector3.ProjectOnPlane(inputDir, groundNormal).normalized;
+
+
+
+        // Pozisyonu her karede (frame) ekleyerek ilerletiyoruz
+        transform.position += slopeMoveDir * speed * Time.deltaTime;
+
+
+        /*---------------------------------------------------------------
+
+         Rotasyon (Dönüş) İçin Transform Kullanımı
+         ----------
+            Karakterin sadece gitmesi yetmez, baktığı yönün de yokuş yukarı dönmesi gerekir
+
+        *///----------------------------------------------------------------
+
+        // 2. ROTASYON: Zemine paralel yatma
+        // slopeMoveDir zaten zemine paralel "ileri" yönümüzdür.
+        // groundNormal ise karakterin "kafasının" bakması gereken yerdir.
+        if (slopeMoveDir != Vector3.zero)
+        {
+
+            // Karakterin hem ileri bakmasını hem de zemine paralel yatmasını sağlar
+            Quaternion targetRotation = Quaternion.LookRotation(slopeMoveDir, groundNormal);
+
+            // Anında dönmek yerine yumşakça döner (Slerp)
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * 1f);
+
+
+        }
+
+
+    }
+
+    void TemelMatematikselKullanım()
+    {
+        if (_objA == null || _planeRef == null) return;
+        Vector3 velocity = _objA.forward * 3f;
+        Vector3 planeNormal = _planeRef.up;
+
+        // Proeject
+        _mathProjected = Vector3.ProjectOnPlane(velocity, planeNormal);
+
+    }
+
+}
