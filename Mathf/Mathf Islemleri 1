@@ -1,0 +1,182 @@
+
+
+using System;
+using Unity.Mathematics;
+using UnityEngine;
+
+public class MathfIslemleri : MonoBehaviour
+{
+
+    void Start()
+    {
+
+
+        /* //  Min (Minimum) ve Max (Maksimum) sayıları verir
+        float[] Sayilar = { 2.5f, 4f, 12.6f, 24.3f };
+        Debug.Log(Mathf.Min(Sayilar));
+        Debug.Log(Mathf.Max(Sayilar)); */
+
+
+        //****************************************************
+
+
+        /* // Approximately İki float değer eşit mi değil mi?
+        // float değerlerde eşittire(=) göre daha doğru sonuç
+        //  == kullanıla bilir ama float türündeki değişkenlerde töleransı vardır
+        if (Mathf.Approximately(1f, 5f / 5f))
+            Debug.Log("Evet Eşit");
+        else
+            Debug.Log("Hayır Eşit DEĞİL"); */
+
+
+        //****************************************************
+
+        /*  // Ceil -> Kendinden büyük veya ona eşit en küçük tam sayıyı döndürür
+                Debug.Log(Mathf.Ceil(8f));
+                Debug.Log(Mathf.Ceil(8.1f));
+                Debug.Log(Mathf.Ceil(8.2f));
+                Debug.Log(Mathf.Ceil(8.3f));
+                Debug.Log(Mathf.Ceil(8.5f));
+                Debug.Log(Mathf.Ceil(8.6f));
+                Debug.Log(Mathf.Ceil(8.8f));
+                Debug.Log(Mathf.Ceil(-8.6f));
+                Debug.Log(Mathf.Ceil(-8.1f)); */
+
+
+        //****************************************************
+
+
+        /* // Floor -> Kendinden küçük veya ona eşit en büyük tam sayıyı döndürür
+        Debug.Log(Mathf.Floor(8f));
+        Debug.Log(Mathf.Floor(8.1f));
+        Debug.Log(Mathf.Floor(8.2f));
+        Debug.Log(Mathf.Floor(8.3f));
+        Debug.Log(Mathf.Floor(8.5f));
+        Debug.Log(Mathf.Floor(8.6f));
+        Debug.Log(Mathf.Floor(8.8f));
+        Debug.Log(Mathf.Floor(-8.6f));
+        Debug.Log(Mathf.Floor(-8.1f)); */
+
+
+        //****************************************************
+
+
+        /*     // Round -> Kendine en yakın tam sayısa yuvarlar
+            Debug.Log(Mathf.Round(8f));
+            Debug.Log(Mathf.Round(8.1f));
+            Debug.Log(Mathf.Round(8.2f));
+            Debug.Log(Mathf.Round(8.3f));
+            Debug.Log(Mathf.Round(8.5f));
+            Debug.Log(Mathf.Round(8.6f));
+            Debug.Log(Mathf.Round(8.8f));
+            Debug.Log(Mathf.Round(-8.6f));
+            Debug.Log(Mathf.Round(-8.1f)); */
+
+
+        //****************************************************
+
+
+        /* // Clamp -> Değişkenin değerlerini üst(max) ve alt(min) limitte kısıtlamak için kullanılır
+        // Değişkenin değeri limitların altında ise minimum limit yapar , üstünde ise maxsimum limit yapar
+        float Para = 5;
+        Debug.Log(Mathf.Clamp(Para,10,150)); */
+
+
+        //****************************************************
+
+
+        /*  // Clapm01 -> Değişkenin değerini 0-1 arasında tutmak için kullanılır
+         // Değer 1 den büyükse 1, sıfırdan küçükse sıfır değerini verir
+         // Değer 0-1 arlığında ise değer ne ise onu yazar
+         float Para = 5;
+         Debug.Log(Mathf.Clamp01(Para)); */
+
+
+        //****************************************************
+
+        /*       // DeltaAngle(float current, float target):
+              // İki açı arasındaki en kısa yolu (shortest path) hesaplar.
+              // Dönüş: Saat yönü için pozitif (+), saat yönünün tersi için negatif (-) değer (Derece).
+              // Örnek: 350'den 10'a gitmek için 20 döndürür (-340 değil).
+              Vector3 direction = target.position - transform.position;
+              float targetAngle = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg;
+              Debug.Log("Gereken Dönüş Miktarı: " + Mathf.DeltaAngle(transform.eulerAngles.y, targetAngle)); */
+
+    }
+
+
+    void Update()
+    {
+
+        // LerpKullanimi();    // Lerp
+
+        SmoothDampKullanimi();
+    
+    }
+
+
+    #region LERP 
+    [Space]
+    [Header("Lerp Degerleri")]
+    public float BaslangicNoktasi = 0f;
+    public float BitisNoktasi = 100f;
+
+    public float duration = 5.0f; // Harelet süresi (saniye cinsinden)
+    public float elapsedTime = 0f; // Geçen süre
+    public float t = 0f; // 0 ile 1 arasındaki ilerleme süresi
+    void LerpKullanimi()
+    {
+
+        // İki float değeri arasında interpolasyon oluşturarak doğrusal bir çizgi boyunca benmi belirlediğim değerlerde hareket eder
+        // A noktası ile B noktası arasında, verdiğim yüzdeye (t) göre bir noktada dur
+        // Lerp Kullanırken Dikkat Etmen Gereken "Tuzak":
+        //                  Kodunda Lerp kullanırken genellikle Time.deltaTime ile çarpım yaparsın. Ancak bu, karakterin asla hedefe ulaşamamasına neden olur; çünkü her karede kalan mesafenin bir kısmını gidersin, bu da bir "Zeno Paradoksu" yaratır.
+        // Zaman Tabanlı Interpolasyon (Basic)
+        if (elapsedTime < duration)
+        {
+            elapsedTime += Time.deltaTime;
+
+            // Zamanı süreye bölerrek 0-1 arası normalize edilmiş değer elde ediyoruz
+            t = Mathf.Clamp01(elapsedTime / duration);
+
+            // Pozisyonu güncelle
+            transform.position = new Vector3(Mathf.Lerp(BaslangicNoktasi, BitisNoktasi, t), 0, 0);
+        }
+        else
+        {
+            Debug.Log("Varış noktasına ulaşıldı");
+        }
+    }
+    #endregion
+
+
+    #region  SMOOTHDAMP
+    [Space]
+    [Header("SmoothDamp Degerleri")]
+    public Transform target;
+    public float _YumusaklikOrani = 0.5f;
+    private float currentVelocity;
+    public float _MaxSpeed = 10f; // Opsiyonel: hız sınırı
+    void SmoothDampKullanimi()
+    {
+        // Mutlak değer (Abs), tam olarak senin dediğin gibi "yönü" (eksi veya artı olmasını) çöpe atıp, sadece "merkeze (veya hedefe) ne kadar uzaklıkta olduğunu" söyler.
+        float mesafe = Mathf.Abs(target.position.x - transform.position.x);
+
+        // 1. EĞER HEDEFTEYSE: Dur ve hızı sıfırla
+        if (mesafe < 0.001f)
+        {
+            currentVelocity = 0; // HIZI SIFIRLA! (En önemli kısım bu)
+            transform.position = new Vector3(target.position.x, transform.position.y, transform.position.z);
+            return;
+        }
+
+        // 2. HENÜZ YOLDA İSE: Hareket et
+        float YeniPozisyon = Mathf.SmoothDamp(transform.position.x, target.position.x, ref currentVelocity, _YumusaklikOrani, _MaxSpeed);
+        transform.position = new Vector3(YeniPozisyon, transform.position.y, transform.position.z);
+
+
+    }
+    #endregion
+
+
+}
