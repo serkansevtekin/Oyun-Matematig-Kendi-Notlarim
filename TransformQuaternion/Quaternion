@@ -1,0 +1,335 @@
+using UnityEngine;
+
+/*
+    Quaternion 
+====================================================================
+
+    Quaternion Nedir?
+    -------------------
+        Quaternion (Dörteyler), 3D uzaydaki dönüşleri (Rotation) ifade etmek için kullanılan 4 bileşenli (x,y,z,w) matematiksel bir yapıdır.
+
+        Neden Euler (0-360) Değil de Quaternion?
+            1. Gimbal Lock (Eksen Kilitlenmesi) problemini engeller
+            2. İki dönüş arasında pürüssüz geçiş (Slerp) sağlar
+            3. Bilgisayar için matematiksel olarak daha verimlidir
+
+        Kural: İçindeki x, y, z, w değerlerine manuel dokunma!
+                Her zaman Unity'nin hazır methodlarını kullan
+
+        
+    --------------------------------------------------------------------
+    KRİTİK TERİMLER VE SABİTLER
+    --------------------------------------------------------------------
+
+            Quaternion.identity 
+                                 -> "Sıfır" dönüdüşü temsil eder.
+                                 -> Objenin eksenleri dünyayla tam hizalıdır
+                                 (Blata örneğinde: Ele tam oturmuş, dönmemiş hali)
+            
+
+            Quaternion.Euler(x,y,z)
+                                 -> Bizim bildiğimiz dereceyi (0-360) Quaternion'a çeviren köprüdür.
+
+    --------------------------------------------------------------------
+    EN ÇOK KULLANILAN METOTLAR (Savaş Kitabı)
+    --------------------------------------------------------------------
+
+            1. LookRotation (Baktırmak):
+                
+                    "Elimde bir yön vektörü var, objeyi o yöne çevir."
+                    
+                    Kullanım:
+                            Vector3 dir = target.position - transform.position;
+                            transform.rotation = Quaternion.LookRotation(dir);
+
+
+            2. Slerp (Yumuşak Dönüş):
+
+                    "A açısnın B açısına t sürede pürüssüzce yaklaştır."
+
+                    Kullanım:
+                            transform.rotation = Quaternion.Slerp(A,B,time);
+
+
+            3. FromToRotation (Hizalamak):
+
+                    "Objenin bir eksenini (örn: up), belirli bir yöne hizala"
+                    (Örn: Karakterin ayalarını yokuşun eğimine uydurmak için)
+                
+                Kullanım:
+                     transform.up -> objenin yukarı yönü
+                     Vector3.up -> zemnin yüzeyinin normali (hit.normal daha iyi olur)
+                     rot * transform.rotation -> objeyi zemine hizalar
+
+                Örnek:
+                    Quaternion rot = Quaternion.FromToRotation(transform.up, Vector3.up);
+                    transform.rotation = rot * transform.rotation;
+
+                Not:
+                    Eğer zemin eğimi varsa, Vector3.up yerine hit.normal kullanmak daha gerçekçi olur
+
+
+            4. AngleAxis (Eksen Etrafında Dönüş):
+                    axis  -> dönülecek eksen
+                    angle -> o eksen etrafında kaç derece dönüleceği
+                    *=    -> mevcut rotasyona ekleme
+                     
+                Kullanım:
+                     transform.rotation *= Quaternion.AngleAxis( angle * Time.deltaTime,  axis);
+                
+                Örnek:
+                     transform.rotation *= Quaternion.AngleAxis(40f * Time.deltaTime, Vector3.up);
+
+                Anlamı:
+                    Obje Y ekseni etrafında saniyede 40 derece döner.
+
+            
+            5. Inverse
+                   // Ters rotasyon almak
+                       Quaternion inv = Quaternion.Inverse(_nokta1.rotation);
+                       transform.rotation = inv; // Artık transform _nokta1'in ters yönüne bakar
+
+                    // İki rotasyon arasındaki fark (Yaygın kullanım)
+                       // diff = rotA’dan rotB’ye gitmek için gereken rotasyon
+                       Quaternion diff = Quaternion.Inverse(_nokta1.rotation) * _nokta2.rotation;
+
+                       Bu yöntem:
+                          AI karakter dönüşleri
+                          Turret / top dönüşleri
+                          Animasyon ve IK sistemlerinde çok yaygın kullanılır.
+
+
+    --------------------------------------------------------------------
+    MATEMATİKSEL İŞLEMLER (Püf Noktaları)
+    --------------------------------------------------------------------
+
+        ÇARPMA İŞLEMİ (*) = TOPLAMA demektir!
+            iki Quaternin'u çarparsanız, dönüşleri birbirine ekelersiniz.
+            - newRot = rotA * rotB; (Önce A kadar, sonra B kadar dön)
+
+        VEKTÖR İLE ÇARPMA = DÖNDÜRME demektir!
+            - Vector3 yeniYon = rotA * Vector3.forward;
+            ( ileri yönü rotA açısı kadar dönüdür)
+
+
+    --------------------------------------------------------------------
+    OYUNLARDA KULLANIM SENARYOLARI
+    --------------------------------------------------------------------
+
+            -> Karakterin hedefe bakması (LookRotation)
+            -> Kameranın oyuncuyu yumşak takip etmesi (Slerp)
+            -> Mermilerin çarptığı yüzeye göre sekmesi (Reflection + LookRotation)
+            -> Objeyi ele oturturekn açı düzeltme (Euler)
+            -> Silahın geri tepme (recoil) animasyonu
+
+
+    --------------------------------------------------------------------
+    GİMBAL LOCK (EKSEN KİLİTLENMESİ) NEDİR?
+    --------------------------------------------------------------------
+        Euler açıları (x,y,z) kullanılırken iki eksen üst üste binerse,
+        sistem 3. boyuttaki hareket kabiliyetini kaybeder.
+        Quaternion bu sorunu 4. boyut (w) yardımıyla kökten çözer.
+*/
+public class QuaternionIslemleri : MonoBehaviour
+{
+    public Transform _nokta1;
+    public Transform _nokta2;
+    void Start()
+    {
+        // transform.localRotation;
+        // transform.rotation;
+        // Debug.Log(transform.rotation);
+        // Debug.Log(transform.localRotation);
+
+        /* // Quaterninon.identity -> objenin dönşünü tamamen sfırlar [ Objeyi "sıfır" rotasyonuna getirir.]
+        Quaternion rot = Quaternion.identity; */
+
+        /*  // Spesifik olarak euler açısı veme ve bu açıyı quaternion'a çevirir
+         Quaternion rot = Quaternion.Euler(0, 0, 40);
+  */
+
+
+        /* // eulerAngles -> Euler açı rotasyonu öğrnemek için (İnspectordakş değeri okuma)
+        Quaternion rot = Quaternion.Euler(20, 0, 40);
+        transform.rotation = rot;
+
+        /*         
+         *HATALI* [Kullanma]
+        // transform.rotation.eulerAngles.x Mevcut rotasyon üzerine rotasyon eklemek
+                //  transform.rotation = Quaternion.Euler(transform.rotation.x + 20, 18, 40);
+                transform.rotation = Quaternion.Euler(transform.rotation.eulerAngles.x + 25, 18, 40);
+        
+
+        ÖNERİLEN KULLANIM (1)
+            transform.rotation *= Quaternion.AngleAxis(25f, Vector3.right);
+
+        ÖNERİLEN KULLANIM (2) -> Mevcut rotasyon üzerine ekleme
+        Quaternion deltaRot = Quaternion.Euler(25,18,40);
+        transform.rotation = transform.rotation * deltaRot;        
+                
+                */
+
+
+
+    }
+
+
+    float elapsedTime = 0;
+    float duration = 2f;
+
+    float speed = 90f;
+    void Update()
+    {
+
+        /*
+        
+        
+        | Amacın                 | Kullan          |
+        | ---------------------- | --------------- |
+        | Sabir hız dönüp durmak | `RotateTowards` |
+        | Yavaşlayarak durmak    | `Slerp`         |
+        | Sabit hız dönmek       | `Rotate`        |
+        | Euler kontrol          | mümkünse kaçın  |
+
+        */
+
+        // Quaternion.RotateTowards
+        // maxDegreesDelta = bu frame dönebileceği maksimum derece
+        /*     float maxDegreesDelta = 150f; // derece
+            transform.rotation = Quaternion.RotateTowards(transform.rotation, _nokta2.rotation, maxDegreesDelta * Time.deltaTime); */
+
+
+
+
+
+        /*   if (Input.GetKeyDown(KeyCode.D))
+        {
+        // ** HATALI ** [Kullanma]
+           transform.rotation = Quaternion.Euler(transform.rotation.eulerAngles.x + 60,0,0);
+
+           // ÖNERİLEN KULLANIM (1)
+           transform.rotation *= Quaternion.AngleAxis(60f, Vector3.right);
+        
+           // ÖNERİLEN KULLANIM (2) -> Mevcut rotasyon üzerine ekleme
+           Quaternion deltaRot = Quaternion.Euler(25,18,40);
+           transform.rotation = transform.rotation * deltaRot;    
+        } */
+
+        /*  // Quaternion.Lerp
+       
+         if (elapsedTime < duration)
+         {
+             elapsedTime += Time.deltaTime;
+             float t = Mathf.Clamp01(elapsedTime / duration);
+             transform.rotation = Quaternion.Lerp(_nokta1.rotation, _nokta2.rotation, t);
+         } */
+
+
+
+        /* // Quaterinon.Slerp
+        if (elapsedTime < duration)
+        {
+            elapsedTime += Time.deltaTime;
+
+            float t = Mathf.Clamp01(elapsedTime / duration);
+            transform.rotation = Quaternion.Slerp(_nokta1.rotation, _nokta2.rotation, t);
+        } */
+
+
+        /* // Quaternion.LookRotation
+        Vector3 diffVector = _nokta2.position - _nokta1.position;
+
+        if (diffVector.sqrMagnitude < 0.001f) return;
+
+        Vector3 directionToNokta2 = diffVector.normalized;
+        Quaternion lokRot = Quaternion.LookRotation(directionToNokta2, Vector3.up);
+        _nokta1.rotation = lokRot; */
+
+
+
+        /*    // FromToRotation bir ekseni başka bir eksene hizalamak için kullanılır:
+           // transform.up -> objenin yukarı yönü
+           // Vector3.up -> zemnin yüzeyinin normali (hit.normal daha iyi olur)
+           // rot * transform.rotation -> objeyi zemine hizalar
+           //Not: Eğer zemin eğimi varsa, Vector3.up yerine hit.normal kullanmak daha gerçekçi olur:
+           Quaternion rot = Quaternion.FromToRotation(transform.up, Vector3.up);
+           transform.rotation = rot * transform.rotation; */
+
+
+
+
+        /*  // Quaternion.Angle -> iki rotasyon arasındaki açıyı derece cinsinden verir [0-180 derece arasında] 
+          Debug.Log(Quaternion.Angle(transform.rotation,_nokta1.rotation));
+
+          // Örnek -> Karakter açısını kontrol etme
+          float angle = Quaternion.Angle(_nokta1.rotation,_nokta2.rotation);
+          if (angle < 5f)
+          {
+             // Hedef neredeyse bakıyor
+          } */
+
+
+        //  Quaternion.Inverse -> q rotasyonunun tersi (inverse rotasyonu)
+
+
+        /*   // Ters rotasyon almak
+       Quaternion inv = Quaternion.Inverse(_nokta1.rotation);
+       transform.rotation = inv; // Artık transform _nokta1'in ters yönüne bakar
+
+        // İki rotasyon arasındaki fark (Yaygın kullanım)
+       // diff = rotA’dan rotB’ye gitmek için gereken rotasyon
+       Quaternion diff = Quaternion.Inverse(_nokta1.rotation) * _nokta2.rotation;
+        
+         */
+
+
+
+
+
+
+        /*  // Quaternion uzunluğunu 1 yaparak sayısal hataları düzeltir
+         transform.rotation = Quaternion.Normalize(transform.rotation);
+         Debug.Log(Quaternion.Normalize(transform.rotation)); */
+
+
+        /*   // Quaternion.AngleAxis bir rotasyonu belirli bir açı ve eksen etrafında üretir.
+          // axis -> döneceği eksen
+          // angle -> 0 eksen etrafında kaç derece dönecek
+
+          transform.rotation *= Quaternion.AngleAxis(speed * Time.deltaTime, Vector3.up); */
+
+
+
+        // TEK ARABA TEKERİ KONTROL ÖRNEĞİ
+        /* 
+  public Transform Teker;
+  public Transform TekerKonum;
+  public float turnSpeed = 100f;      // base speed
+  public float maxSpeed = 300f;       // maksimum hız
+  public float minSpeed = 0f;         // minimum hız
+  public float rotateSpeed = 30f;
+  public float MaxHorizontalRotate = 45f;
+  void Update()
+  {
+      float verticalInput = Input.GetAxis("Vertical");
+
+      // turnSpeed'i input ile kontrol et
+      float currentSpeed = verticalInput * turnSpeed * 50f; // 50f  = hız artış miktarı
+
+      // clamp ile sınırla
+      currentSpeed = Mathf.Clamp(currentSpeed, minSpeed, maxSpeed);
+
+      TekerKonum.rotation *= Quaternion.AngleAxis(currentSpeed * Time.deltaTime, Vector3.right);
+
+      float horizontalInput = Input.GetAxis("Horizontal");
+
+      if (horizontalInput != 0)
+      {
+          Quaternion targatRot = Quaternion.Euler(0, horizontalInput * MaxHorizontalRotate, 0);
+          Teker.rotation = Quaternion.RotateTowards(Teker.rotation, targatRot, rotateSpeed * Time.deltaTime);
+      }
+
+  }
+*/
+    }
+}
