@@ -1,0 +1,114 @@
+/*
+====================================================================
+RotateTowards
+====================================================================
+
+    ROTATETOWARDS NEDİR?
+    ------------------------
+        Bir yön vekrönü başka bir yöne SABİT AÇISAL HIZLA döndürür.
+
+        Lerp -> doğrusal
+        Slerp -> oransal bazlı açısal
+        RotateTowards -> derece bazlı açısal hız
+
+    
+    --------------------------------------------------------------------
+    PARAMETRE
+    --------------------------------------------------------------------
+
+        Vector3.RotateTowards(current, target, maxRadiansDelta, maxMagnitıdeDelta)
+
+        maxRadiansDelta -> BU frame de maksimum kaç RADYAN dönebilir
+        maxMagnitudeDelta -> magnitude değişim limiti
+
+        Sabit derece için: 
+                        maxRadinsDelta = angularSpeed * Mathf.Deg2Rad * Time.deltaTime;
+
+
+        
+        --------------------------------------------------------------------
+        MANTIK
+        --------------------------------------------------------------------
+
+            İçeride:
+                    - Angle hesaplanır
+                    - En fazla maxRadiansDelta kadar yaklaşılır
+                    - Overshoot yapmaz
+
+                    MoveTowars'ın açısal versiyonu gibi düşünebiliriz
+
+
+        --------------------------------------------------------------------
+        OYUNLARDA KULLANIM
+        --------------------------------------------------------------------
+            
+            -> Karkater hedef sabit dereceyle dönsün
+            -> Taret sistemi
+            -> AI bakış yönü
+            -> Füze yönlendirme
+            -> Smooth ama deterministik dönüş
+
+
+        --------------------------------------------------------------------
+        PERFORMANS
+        --------------------------------------------------------------------
+            
+            İçinde:
+                -> Dot
+                -> Acot
+                -> Normalize
+                Orta maliyet ama güvenlidir.
+
+====================================================================
+*/
+public class RotateTowardsVector : MonoBehaviour
+{
+
+    public Transform _target;
+
+    public float angularSpeed = 180f; // derece / saniye
+
+    void Update()
+    {
+        if (_target == null) return;
+
+        Vector3 currentDir = transform.forward;
+        Vector3 targetDiff = _target.position - transform.position;
+
+        if (targetDiff.sqrMagnitude < 0.001f) return;
+
+        Vector3 targetDireciton = targetDiff.normalized;
+
+
+
+        // 1) Sabit açısal hız (radyan cinsinden)
+        float step = angularSpeed * Mathf.Deg2Rad * Time.deltaTime;
+
+        Vector3 newDirection = Vector3.RotateTowards(currentDir, targetDireciton, step, 0f);
+
+        // Objeyi yeni yöne çevir
+        transform.rotation = Quaternion.LookRotation(newDirection);
+
+        // 2) Açı bilgisini öğrenme
+        float remaningAngle = Vector3.Angle(newDirection, targetDireciton);
+
+        Debug.Log("Remaning Angle: " + remaningAngle);
+
+
+        // 3) Manuel Mantık (konsept)
+        float totalAngle = Vector3.Angle(currentDir, targetDireciton);
+        float rotateThisFrame = Mathf.Min(totalAngle, angularSpeed * Time.deltaTime);
+
+        Debug.Log("Total Angle: " + totalAngle);
+        Debug.Log("Rotate This Frame: " + rotateThisFrame);
+
+        // 4) Görselleştirme
+        Debug.DrawRay(transform.position, currentDir, Color.blue);
+        Debug.DrawRay(transform.position, targetDireciton, Color.red);
+        Debug.DrawRay(transform.position, newDirection, Color.green);
+    
+    }
+
+
+
+}
