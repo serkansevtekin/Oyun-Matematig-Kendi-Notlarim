@@ -1,0 +1,133 @@
+
+/* Oyun Matematiği tablo
+
+| İşlem           | Unity Kodu                     | Ne İşe Yarar? (Pratik Kullanım)                                              |
+| --------------- | ------------------------------ | ---------------------------------------------------------------------------- |
+| Fark Vektörü    | `b.pos - a.pos`                | İki nokta arasındaki "yol"dur. Hem yönü hem mesafeyi içinde tutar.           |
+| Normalleştirme  | `.normalized`                  | Vektörün yönünü koruyup boyunu tam 1 birim yapar (Birim Vektör).             |
+| Mesafe (Kısa)   | `Vector3.Distance(a, b)`       | İki nokta arasındaki kuş uçuşu mesafeyi (metre) verir.                       |
+| Mesafe (Hassas) | `.magnitude`                   | Bir vektörün (genellikle fark vektörünün) gerçek uzunluğunu verir.           |
+| Hızlı Mesafe    | `.sqrMagnitude`                | Karekök almadığı için çok hızlıdır. Mesafe kıyaslamalarında (if) kullanılır. |
+| Nokta Çarpımı   | `Vector3.Dot(a, b)`            | Düşman beni görüyor mu? (Açı kontrolü: >0 önünde, <0 arkasında).             |
+| Dış Çarpım      | `Vector3.Cross(a, b)`          | İki vektöre dik 3. bir yön bulur (Örn: Tekerlek aksı veya normal bulma).     |
+| İzdüşüm         | `Vector3.Project(a, b)`        | Bir vektörü başka bir çizgi üzerine yansıtır (Hızı bir yöne kısıtlamak).     |
+| Düzleme Yatırma | `Vector3.ProjectOnPlane(a, n)` | Vektörü bir zemine paralel hale getirir (Eğimli arazide yürüme).             |
+| Yansıma         | `Vector3.Reflect(v, n)`        | Sekme açısını hesaplar (Örn: Duvara çarpan lazer veya top).                  |
+
+*/
+public class VectorIslemleri2 : MonoBehaviour
+{
+    public Transform Obje1;
+    public Transform Obje2;
+
+    Vector3 AtanacakPozisyon;
+    void Start()
+    {
+
+        /* 
+          Vector3.back;     ->  Vector3(0,0,-1);
+          Vector3.forward;  ->  Vector3(0,0,1);
+          Vector3.up        ->  Vector3(0,1,0);
+          Vector3.down      ->  Vector3(0,-1,0);
+          Vector3.left      ->  Vector3(-1,0,0);
+          Vector3.right     ->  Vector3(1,0,0);
+          Vector3.zero      ->  Vector3(0,0,0);
+          Vector3.one       ->  Vector3(1,1,1);
+
+          // transform.position = Vector3.up;
+        */
+
+
+        /*// Kordinatlarda matematiksel işlemler  
+
+        Vector3 _Kordinat1 = new Vector3(9f, 5f, 3f);
+          Vector3 _Kordinat2 = new Vector3(4f, 2f, 2f);
+
+
+          Debug.Log(_Kordinat1 + _Kordinat2);
+          Debug.Log(_Kordinat1 * 4);
+          Vector3 _KordinatlarToplami = _Kordinat1 + _Kordinat2;
+          _Kordinat2 = _Kordinat1 + _Kordinat2;
+          _Kordinat2 += _Kordinat1;
+          _Kordinat2 -= _Kordinat1;
+
+   //**************************************************************************
+          // Fark vektörü
+          Debug.Log(_Kordinat1 - _Kordinat2);
+          Vector3 fark = Obje1.position - Obje2.position;
+
+   //**************************************************************************
+
+          //  orijin (0,0,0) ile Obje1 arasındaki orta noktayı verir.
+          Vector3 OrjinIleObjeArasindekiOrtaNokta = Obje1.position / 2;
+
+   //**************************************************************************
+          // İki objenin tam orta noktasını bulmak için:
+          Vector3 ObjeArasindakiOrtaNokta = (Obje1.position + Obje2.position) / 2; */
+
+
+        /*   // Kordinat eşleştirme veya sorgulama
+         Vector3 _Kordinat1 = new Vector3(9f, 3f, 3f);
+         Vector3 _Kordinat2 = new Vector3(9f, 3f, 3f);
+
+
+         // 2 korditan bir birine eşit mi?
+
+           // Equals (TERCİH EDİLMEZ)-> iki değeri karşılaştırmamızı sağlar. İki vektör tam olarak eşit mi değilmi kontrol eder. Ama bazen eşit olsalar bile false dönebiliyor
+          if (Equals(_Kordinat1, _Kordinat2))
+              Debug.Log("Equals: Evet Aynılar");
+          else
+              Debug.Log("Equals: Hayır Değiller");
+
+         //**************************************************************************
+
+            // == operatorünü kullanırsak çok küçük bir tolransı var (0.00001f) nerede ise anlaşılmayacak kadar
+            if (_Kordinat1 == _Kordinat2)
+                Debug.Log("Operatör: Evet Aynılar");
+            else
+                Debug.Log("Operatör: Hayır Değiller"); */
+
+
+        /* // Obje pozisyonunu alarak işlem yapma
+        // AtanacakPozisyon = Obje1.position;
+        // AtanacakPozisyon = new Vector3(Obje1.position.x, Obje1.position.y, Obje1.position.z);
+        AtanacakPozisyon.Set(Obje1.position.x, Obje1.position.y, Obje1.position.z); */
+
+
+        // Fark vektörü : Yön ve Uzunluğun Kaynağı
+        // Açıklama: İki nokta arasındaki "yol haritası"dır. Bu vektör hem hangi tarafa gitmen gerektiğini (yön) hem de ne kadar gitmen gerektiğini (mesafe) içinde barındırır.
+        // Kural: Her zaman (Hedef - Başlangıç) formülü uygulanır.
+        Vector3 farkVektoru = (Obje1.position - transform.position);
+
+
+        // .normalized : Sadece Yön (Saf Yön)
+        // Açıklama: Mesafeyi çöpe atıp uzunluğu 1 birim yapar. Bu, "hızdan bağımsız olarak sadece hangi yöne bakmalıyım?" sorusunun cevabıdır. Karakter hareket ettirirken bu Yon değerini hiz ile çarpmak için kullanırsın.
+        Vector3 Yon = farkVektoru.normalized;
+
+        // .magnitude : Kuş Uçuşu Mesafe (Metre)
+        // Açıklama: Vektörün gerçek uzunluğunu (örneğin 5.4 metre) verir. Pisagor teoremiyle hesaplandığı için içinde bir karekök (sqrt) işlemi barındırır.
+        float Mesafe = farkVektoru.magnitude;
+
+        // .sqrMagnitude : : Performans Canavarı (Hızlı mesafe karşılaştırma)
+        // Açıklama: Mesafenin karesini verir. Bilgisayarlar için "karekök" hesaplamak yorucu bir iştir. Eğer sadece "Mesafe 2'den küçük mü?" gibi bir kıyaslama yapacaksan, karekök almadan sqrMagnitude kullanmak çok daha hızlıdır. * İpucu: Kıyaslama yaparken aradığın rakamın da karesini almalısın (2 \times 2 = 4).
+        if (farkVektoru.sqrMagnitude < 2 * 2)
+            Debug.Log("mesafe 2 den küçük");
+        else
+            Debug.Log("mesafe 2 den büyük");
+
+        // Vector3.Distance(a,b) == .magnitude : Kolay Yol
+        // Açıklama: Aslında arka planda senin yazdığın (a - b).magnitude işlemini yapar. Kodun okunabilirliğini artırmak için kullanılan bir kestirmedir.
+        float IkiNoktaArasindekiMesafe = Vector3.Distance(Obje1.position, transform.position);
+
+
+    }
+
+    /*  void OnGUI()
+     {
+         if (GUI.Button(new Rect(10, 10, 100, 50), "Pozisyon Ver"))
+         {
+             transform.position = AtanacakPozisyon;
+         }
+     } */
+
+}
