@@ -1,0 +1,237 @@
+/*
+====================================================================
+Cross Product
+====================================================================
+    
+    CROSS NEDİR?
+    ------------
+        Cross Product (Vektörel Çarpım), iki vektöre dik bir vektör üretir
+
+        Formül:
+            Cross(a, b) = a × b
+
+        Sonuç:
+            -> a ve b'ye dik bir vektör ğretir
+            -> Yönü sağ el kuralına göre belirlenir
+            -> Büyüklüğü = |a| |b|sin(θ)
+
+        θ = iki vektör arasındaki açı
+
+
+    --------------------------------------------------------------------
+    DOT – CROSS İLİŞKİSİ
+    --------------------------------------------------------------------
+
+        Dot  = |a||b| cosθ -> açı büyüklüğü
+        Cross= |a||b| sinθ -> dönüş yönü + dik eksen
+
+        normalize edilmiş vektörler için:
+                                    dot² + |cross|² = 1
+
+                                    Çünkü:
+                                    cos²θ + sin²θ = 1
+
+                                    Dot sana "ne kadar döneceğini"
+                                    Cross sana "hangi yöne döneceğini" söyler
+
+
+    --------------------------------------------------------------------
+    OYUNLARDA KULLANIM
+    --------------------------------------------------------------------
+
+        -> Hedef sağda mı solda mı?
+        -> Saad yönünde mi ters mi döeneceğim?
+        -> Yüzey normali üretmek
+        -> Kamera yatay dönüş kontrolü
+        -> Eğime dik yön bulmak
+        -> Torque / fizik yönü
+
+
+    --------------------------------------------------------------------
+    EN KRİTİK KULLANIM: SAĞ – SOL TESPİTİ
+    --------------------------------------------------------------------
+
+        Y ekseni yukarı olan bir sahnede:
+                                     cross.y > 0    -> hedef solda
+                                     cross.y < 0    -> hedef sağda
+                                     
+                                     (Bu, forward x direction sırasına bağlıdır)
+
+
+    --------------------------------------------------------------------
+    ÖNEMLİ KURAL
+    --------------------------------------------------------------------
+
+        Sıra değişirse yön değişir:
+                                a × b ≠ b × a
+                                b × a = - (a × b)
+
+                                Yani cross anti-komütatiftir.
+
+
+    --------------------------------------------------------------------
+    SOL EL KURALI VE SIRALAMA REHBERİ (Unity Standart)
+    --------------------------------------------------------------------
+
+        Sıralama: Vector3.Cross(forward, direction) 
+                                    -> (Önce BAKTIĞIM yer, sonra HEDEFİN olduğu yer)
+
+        Sol Elini Kullan:
+                1. İşaret Parmağı   -> forward (İlk vektör: Nereye bakıyorum?)
+                2. Orta Parmağı     -> direction (İkinci vektör: Hedef nerede?)
+                3. Baş Parmağı      -> CROSS SONUCU (Vektörel çarpım yönü)
+
+
+        Sonuç Analizi:
+                -> Baş parmağın YUKARI (Up) bakıyorsa: Hedef SOLDA (+)
+                -> Baş parmağın AŞAĞI (Down) bakıyorsa: Hedef SAĞDA (-)
+
+        Kritik Nokta: Sıralamayı değiştirirsen (direction, forward) baş parmağın
+        yön değiştirir ve tüm sağ-sol el mantığı tersine döner!
+
+
+    ====================================================================
+        PERFORMANS VE SEÇİM REHBERİ
+    --------------------------------------------------------------------
+            Angle / Acos YAVAŞTIR. İçinde ağır trigonometrik hesaplamalar barındırır.
+            Vector3.SignedAngle EN YAVAŞTIR (Acos + Cross işlemlerini birleştirir).     
+
+            KURAL: Eğer sadece 'Miktar' (açı) arıyorsan Angle, 
+                   Eğer sadece 'Yön' arıyorsan Cross, 
+                   Hem miktar hem yön gerekiyorsa SignedAngle.      
+
+            - Sadece UI'da derece göstermek veya hassas farklar için bunları kullan.
+            - Mantıksal kararlar (Görüyor muyum?) için DOT tercih et.       
+
+            Örnek (FOV Kontrolü): 
+                // 90 derecelik FOV için cos(45) sakla (Start'ta Cachele)
+                float cosHalfFov = Mathf.Cos(FOV * 0.5f * Mathf.Deg2Rad);
+                
+                // Dot hesapla ve karşılaştır (Görüyor muyum?)
+                float dot = Vector3.Dot(forward, direction);
+                if(dot > cosHalfFov) // Görüyorum! (HIZLI)      
+
+            ------------------------------------------------------------
+            HANGİSİNİ SEÇMELİYİM? (Hız Sıralaması)
+            ------------------------------------------------------------
+            1. "Görüyor muyum?" (FOV) -> DOT (En Hızlı / Şampiyon)
+               if (dot > cosHalfFov)        
+
+            2. "Sağda mı Solda mı?"   -> CROSS (Hızlı / Yön odaklı)
+               // Sıralama: (Baktığım_Yön, Hedefin_Yönü)
+               float side = Vector3.Dot(Vector3.Cross(forward, direction), transform.up);
+               if (side > 0) // SOL (+)  | else if (side < 0) // SAĞ (-)        
+
+            3. "Kaç derece fark var?" -> ANGLE (Yavaş / Sadece miktar)
+               angle = 30° (Yönü bilmez)        
+
+            4. "Hangi yöne kaç derece?"-> SIGNEDANGLE (En Yavaş / Hepsi bir arada)
+               angle = -30° (Hem miktar hem yön)
+            ------------------------------------------------------------
+
+
+    --------------------------------------------------------------------
+    DOT = KARAR MİKTARI
+    CROSS = KARAR YÖNÜ
+    --------------------------------------------------------------------
+*/
+
+public class Cross_Vector : MonoBehaviour
+{
+    public Transform _objA;
+    public Transform _objB;
+
+    [Header("Precision")] // hassasiyet
+    public float zeroThreshold = 0.0001f;
+
+    void Update()
+    {
+        if (_objA == null || _objB == null) return;
+
+        Vector3 move = _objB.position - _objA.position;
+
+        if (move.sqrMagnitude < zeroThreshold * zeroThreshold)
+            return;
+
+        Vector3 direction = move.normalized;
+        Vector3 forward = _objA.forward; // zaten normalize
+
+
+
+
+        // 1) Cross Hesaplama
+        Vector3 cross = Vector3.Cross(forward, direction);
+
+        Debug.Log("Cross Vector: " + cross);
+        Debug.Log("Cross Magnitude (sinθ): " + cross.magnitude);
+
+
+
+
+        // 2) Sağ - Sol kontrolü (Y eksenine göre)
+        float side = Vector3.Dot(cross, _objA.up);
+
+        if (side > zeroThreshold)
+            Debug.Log("Hedef SOLDA");
+        else if (side < -zeroThreshold)
+            Debug.Log("Hedef SAĞDA");
+        else
+            Debug.Log("Hedef tam ön/arka doğrultuda");
+
+
+
+
+        // 3) Dot ile birlikte gerçek dönüş kararı
+        float dot = Vector3.Dot(forward, direction);
+
+        if (dot < 0.99f) // küçük açı toleransı
+        {
+            if (side > 0)
+                Debug.Log("Sola dön");
+            else if (side < 0)
+                Debug.Log("Sağa dön");
+        }
+
+
+
+
+        // 4) Yüzey normali örneği ( Normalde Raycast kullanılır )
+        // İki kenardan yüzeye dik normal üretme
+        Vector3 exampleA = Vector3.right;
+        Vector3 exampleB = Vector3.forward;
+
+        Vector3 surfaceNormal = Vector3.Cross(exampleA, exampleB).normalized;
+        Debug.Log("Örnek yüzey normali: " + surfaceNormal);
+
+
+
+
+
+
+        // 5) Tam 360° Yön Sınıflandırma (Sağ ön / Sol Arka vb.)
+        // Dot   --> Ön / Arka
+        // Cross --> Dönüş ekseni
+        // Dot(cross, up) -> Sağ / Sol (gerçek 3D çözüm)
+
+
+        if (dot > zeroThreshold) // Ön yarı düzlem
+        {
+            if (side > zeroThreshold)
+                Debug.Log("SOL ÖN");
+            else if (side < -zeroThreshold)
+                Debug.Log("SAĞ ÖN");
+            else
+                Debug.Log("TAM ÖN");
+        }
+        else if (dot < -zeroThreshold) // Arka yarı düzlem
+        {
+            if (side > zeroThreshold)
+                Debug.Log("SOL ARKA");
+            else if (side < -zeroThreshold)
+                Debug.Log("SAĞ ARKA");
+            else
+                Debug.Log("TAM ARKA");
+        }
+
+    }
+}
