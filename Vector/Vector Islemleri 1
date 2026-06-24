@@ -17,7 +17,9 @@ public class VecrtorIslemleri : MonoBehaviour
     {
         //  _Pozisyon = new Vector3(4.2f, 6.5f, 3.2f);
 
-        // scriptin bağlı olduğu objenin pozisyonunun almak için
+          // Scriiptin bağlı olduğu GameObje'nin pozisyonunu almak için
+        _Pozisyon = transform.position; // Vector3 türünde dünya kordinartlarına göre pozisyon değeri verir
+
         //transform.position = new Vector3(4.2f,6.5f,3.2f);
         // transform.position = _Pozisyon;
         // transform.position = _DisaridanPozisyonum;
