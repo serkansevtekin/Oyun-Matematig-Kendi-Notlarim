@@ -27,10 +27,20 @@ using UnityEngine;
 
         !!Kritik Nokta!! -> Zero vector (0,0,0) normalize edilmez
 
+
         Geometrik Karşılığı:
             -> 2D uzayda (Vector2) normalize edilmiş tüm vektörlern bitiş noktası bir "Birim Çember" (yarı çapı 1 olan çember) üzerindedir
             -> 3D uzayda (Vector3) is bu durum biri "Birim Küre" (yarı çapı 1 olan küre) oluşturur
             -> Normalize işlemi, vektörün değiştirmeden  bu çemberin/kürenin  yüzeyine çeker;
+
+
+        Trigonometri ve Birim Çember İlişkisi:
+            -> sin ve cos fonksiyonları, yapıları gereği  bize her zaman birim çember (yarıçapı 1 olan ) üzerinde  bir nokta verir
+            -> Örneğin, bir açıdan (sin(alpha), cos(alpha)) şeklinde ürettiğimiz bir Vector2, zaten kendiliğinden NORMALİZE bir vektördür (uzunluğu 1'dir)
+            -> .normalized özelliği de aslında trigonometri kullanmadan, herhangi bir vektörü bu birim çemberin/kürenin çeperine hizalama işlemidir
+
+
+
 */
 
 public class Normalized : MonoBehaviour
