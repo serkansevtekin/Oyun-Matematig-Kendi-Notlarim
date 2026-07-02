@@ -1,94 +1,100 @@
+using UnityEngine;
+
 /*
-    .normalized
+ .normalized
     ------------------
-        Amaç: Bir vektörün yönünü elede etmek (uzunluğunu 1 yapmak)
-
-        normalized ne yapar?
-                        - Vektörün yönünü korur
-                        - Uzunluğunu 1'e sabitler
-                        - Büyüklük bilgisini atar
+        Amaç:
+            -> Bir vektörün yönün elde etmek
+            -> Uzunluğunu 1 yapmak
 
 
+        .normalized ne yapar?
+            -> Vektörün yönünü korur
+            -> Uzunluğu 1'e sabitler
+            -> Büyüklük bilgisi verir
+
+        
         Formül: direction = vector / vector.magnitude
 
 
-        Ne zaman kullanılır?
-                        - Harefekt yönü belirlerken
-                        - Sabit hızla ilerlerken
-                        - Kuvvet uygularken
-                        - Yön kontrolü yaparken
+        Ne zaman kulanılır?
+            -> Hareket yönü belirlenirken
+            -> Sabit hızda ilerliyorken
+            -> Kuvvet uygularken
+            -> Yön kontrolü yaparken
 
 
 
         !!Kritik Nokta!! -> Zero vector (0,0,0) normalize edilmez
 
-
+        Geometrik Karşılığı:
+            -> 2D uzayda (Vector2) normalize edilmiş tüm vektörlern bitiş noktası bir "Birim Çember" (yarı çapı 1 olan çember) üzerindedir
+            -> 3D uzayda (Vector3) is bu durum biri "Birim Küre" (yarı çapı 1 olan küre) oluşturur
+            -> Normalize işlemi, vektörün değiştirmeden  bu çemberin/kürenin  yüzeyine çeker;
 */
-public class Normalized_Vector : MonoBehaviour
+
+public class Normalized : MonoBehaviour
 {
 
     // Örnek Vektörler
     public Vector3 pointA = new Vector3(1, 0, 1);
     public Vector3 pointB = new Vector3(4, 0, 5);
 
+
     public float speed = 5f;
 
     void Start()
     {
-
         // 1. fark vektörü
-        Vector3 diff = pointB - pointA;
-        Debug.Log("Fark vektörü: " + diff);
-
+        Vector3 diffVector = pointB - pointA;
+        Debug.Log("Fakr vektörü: " + diffVector);
 
 
         // 2. Normalize edilmiş yön
-        Vector3 direction = diff.normalized;
+        Vector3 direction = diffVector.normalized;
         Debug.Log("Normalize edilmiş yön: " + direction);
 
 
+        // 3. Magnitude kontrolü ile yönün uzunlu mi? .normalized işe yaramış mı(1 olmalı)
+        Debug.Log("Direction magnitude: " + direction.magnitude);
 
 
-        // 3. Magnitude kontrolü (1 olmalı)
-        Debug.Log("Direciton magnitude: " + direction.magnitude);
-
-
-
-        // 4 sabit hızla hareket örneği
+        // 4. sabit hızla hareket örneği
         Vector3 velocity = direction * speed;
         Debug.Log("Hız vektörü (direction * speed): " + velocity);
 
 
-
-        // 5. Manuel normalize işlemi
-        if (diff != Vector3.zero)
+        // 5. Manuel normalize işilemi [normalized arka planda neler yapıyor]
+        if (diffVector != Vector3.zero)
         {
-            Vector3 manuelDirection = diff / diff.magnitude;
-            Debug.Log("Manuel normalize sonucu: " + manuelDirection);
+            Vector3 manuelDirection = diffVector / diffVector.magnitude;
+            Debug.Log("Manuel normalized: " + manuelDirection);
         }
 
 
-        // 6. Güvenli ve doğru normalize (threshold ile)
-        Vector3 move = diff;
 
+        /*  6. Güvenli ve daha doğru normalized (threshold ile)
+                
+                  Bu threshold yaklaşımı genelde:
+                        -> Input normalize ederken
+                        -> Çok küçük hareketleri yok saymak isterken
+                        -> Fizik jitter engellemek isterken
+        */
+        Vector3 move = diffVector;
+
+        //    !!Kritik Nokta!! -> Zero vector (0,0,0) normalize edilmez [if kontrolünde sqrMagnitude ile değer sıfırdan büyükse yap diyoruz]
         if (move.sqrMagnitude > 0.001f)
         {
             move = move.normalized;
-            Debug.Log("Threshold ile normalize edilmiş move: " + move);
+            Debug.Log("Thresold ile normalize edilmiş move: " + move);
         }
         else
         {
             Debug.Log("Move vektörü çok çüçük, normalize edilmedi");
         }
 
-        /*
-        Bu threshold yaklaşımı genelde:
-                                -> Input normalize ederken
-                                -> Çok küçük hareketleri yok saymak isterken
-                                -> Fizik jitter engellemek isterken
-        */
+
 
     }
-
 
 }
