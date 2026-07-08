@@ -1,68 +1,72 @@
+using UnityEngine;
+using UnityEngine.Rendering;
+
+
 /*
 ====================================================================
 Dot Product
 ====================================================================
+    
+    Dot Nedir?
+    -----------------
+        Dot Product (Scaler Çarpım), iki vektör arasındaki yön ilişkisini ölçer
+        Dot = açı büyükşlüğü (cos0)
 
-    DOT NEDİR?
-    ------------
-     Dot Product (Skaler Çarpım), iki vektör arasındaki yön ilişkisini ölçer
-     Dot = açı büyüklüğü (cosθ)
-     
-         Formül:
-            Dot(a, b) = a.x*b.x + a.y*b.y + a.z*b.z         
+            Formül:
+                Dot(a, b) = a.x*b.x + a.y*b.y + a.z*b.z  
 
             Geometrik karşılığı:
-            Dot(a, b) = |a| * |b| * cos(θ)          
+                Dot(a, b) = |a| * |b| * cos(0)
 
-            θ = iki vektör arasındaki açı
+            0 = iki vektör arasındaki açı
 
-    
+
     --------------------------------------------------------------------
     EN KRİTİK KURAL
     --------------------------------------------------------------------
 
-        Açı kıyaslaması yapmak isitiyorsan iki vektör de normalize olmalıdır.
+        Açı kıyaslaması yapmak istiyorsan iki vektör de normalize olmalıdır.
 
         Normalize değilse:
-                    -> Dot sonucu büyüklükten etkilendir.
+            -> Dot sonucu büyüklükten etkilenirdi.
 
-        Normaklize ise:
-                    -> Dot = cos(θ) olur.
-                    -> Değer aralığı: [-1, 1]
-    
+        Normaliz ise:
+            -> Dot = cos(0) olur
+            -> Değer aralığı: [-1, 1]
 
 
     --------------------------------------------------------------------
     DOT SONUCU NE ANLATIR?
     --------------------------------------------------------------------
 
-        > 0  -> Aynı yöne bakıyor   (ön bölge)
-        < 0  -> Zıt yöne bakıyorlar (arka bölge)
-        ≈ 0  -> Birbirine dik (90°)
+            >0 -> Aynı yöne bakıyor (ön bölge)
+            <0 -> Zıt yöne bakıyorlar (arka bölge)
+            =0 -> birbirine dik (90°)
 
-
-    NOT:
-        - Floating point hataları nedeniyle tam 0  beklenmez
-        - Eşik değeri kullanır (örn: 0.001f)
+        NOT:
+            - Floating point hataları nedeniyle tam 0 beklenmez
+            - eşik değeri kullanır (örn: 0.001f)
 
 
     --------------------------------------------------------------------
     OYUNLARDA KULLANIM
     --------------------------------------------------------------------
 
-        - Önümde mi / arkamda mı?
-        - GÖrüş açısı (FOV)
-        - AI algılama sistemi
-        - Hedefe yaklaşıyor muyum
-        - Yüzeye paralel mi dik mi?
-        - Projection işlemleri
-        - Hareket yönü kontrolü
+            - Önümde mi? Arkamda mı?
+            - Görüş açısı (Fov)
+            - AI algılama sistemi
+            - Hedefe yaklaşıyormuyum
+            - Yüzeye paralel mi? Dik mi?
+            - Projection işlemleri
+            - Hareket yönü kontrolü
 
-    
+
+
+
     --------------------------------------------------------------------
     PERFORMANS SIRASI (GERÇEK OYUN SİSTEMİ)
     --------------------------------------------------------------------
-
+            
         - sqrMagnitude      -> menzil kontrolü (ucuz)
         - Dot               -> açı kontrolü (ucuz)
         - Cos threshold     -> FOV sınırı
@@ -72,61 +76,72 @@ Dot Product
 
 
 
-        ====================================================================
+    ====================================================================
         PERFORMANS VE SEÇİM REHBERİ
-        --------------------------------------------------------------------
-            Angle / Acos YAVAŞTIR. İçinde ağır trigonometrik hesaplamalar barındırır.
-            Vector3.SignedAngle EN YAVAŞTIR (Acos + Cross işlemlerini birleştirir).     
+    --------------------------------------------------------------------
+        
+        Angle / Acos YAVAŞTIR. İçinde ağır trigonometrik hesaplamalar barındırır.
+        Vector3.SignedAngle EN YAVAŞTIR (Acos + Cross işlemlerini birleştirir)
 
-            KURAL: Eğer sadece 'Miktar' (açı) arıyorsan Angle, 
-                   Eğer sadece 'Yön' arıyorsan Cross, 
-                   Hem miktar hem yön gerekiyorsa SignedAngle.      
+        KURAL:
+            - Eğer sadece 'Miktar' (açı) arıyorsan -> Angle
+            - Eğer sadece "Yön" arıyorsan -> Cross
+            - Hem miktar hem yön gerekiyorsa SignedAngle
 
-            - Sadece UI'da derece göstermek veya hassas farklar için bunları kullan.
-            - Mantıksal kararlar (Görüyor muyum?) için DOT tercih et.       
 
-            Örnek (FOV Kontrolü): 
-                // 90 derecelik FOV için cos(45) sakla (Start'ta Cachele)
-                float cosHalfFov = Mathf.Cos(FOV * 0.5f * Mathf.Deg2Rad);
-                
-                // Dot hesapla ve karşılaştır (Görüyor muyum?)
-                float dot = Vector3.Dot(forward, direction);
-                if(dot > cosHalfFov) // Görüyorum! (HIZLI)      
+        *- Sadece UI'da gerece göstermek veya hassas farklar için bunları kullan
+        *- Mantıksal kararlar (Görüyor muyum?) için " DOT " tercih et
 
-            ------------------------------------------------------------
+
+        Örnek (FOV Kontrolü):
+            // 90 derecelik Fov için cos(45) sakla (Start'ta Cachele)
+            float cosHalfFov = Mathf.Cos(FOV * 0.5f * Mathf.Deg2Rad);
+
+            // Dot hesapla ve karşılaştır (Görüyormuyum)
+            float dot = Vector3.Dot(forward,direction);
+            if(dot > cosHalfFov) // Görüyormuyum! (Hızlı)
+            
+            
+            
+            
+            
+    ------------------------------------------------------------
             HANGİSİNİ SEÇMELİYİM? (Hız Sıralaması)
-            ------------------------------------------------------------
-            1. "Görüyor muyum?" (FOV) -> DOT (En Hızlı / Şampiyon)
-               if (dot > cosHalfFov)        
+    ------------------------------------------------------------            
 
-            2. "Sağda mı Solda mı?"   -> CROSS (Hızlı / Yön odaklı)
-               // Sıralama: (Baktığım_Yön, Hedefin_Yönü)
-               float side = Vector3.Dot(Vector3.Cross(forward, direction), transform.up);
-               if (side > 0) // SOL (+)  | else if (side < 0) // SAĞ (-)        
-
-            3. "Kaç derece fark var?" -> ANGLE (Yavaş / Sadece miktar)
-               angle = 30° (Yönü bilmez)        
-
-            4. "Hangi yöne kaç derece?"-> SIGNEDANGLE (En Yavaş / Hepsi bir arada)
-               angle = -30° (Hem miktar hem yön)
-            ------------------------------------------------------------
+        1. "Görüyor muyum? (FOV) -> DOT (En Hızlı / Şampiyon)
+            if (dot > cosHalfFov)
 
 
+        2. "Sağda mı? Solda mı? ->  CROSS (Hızlı / Yön Odaklı)
+        // Sıralama: (Baktığım_Yön, Hedefin_Yönü)
+        Vector3 crossSonucu = Vector3.Cross(forward, direction);
+        float side = Vector3.Dot(crossSonucu, transform.up);
+        if (side > 0)      // SAĞ (+) 
+        else if (side < 0) // SOL (-) 
 
---------------------------------------------------------------------------
 
-    DOT = KARAR
-    ACOS = BİLGİ
-    DISTANCE = ETKİ ALANI
-    CROSS = YÖN
+        3. "Kaç derece fark var?" -> ANGLE (Yavaş / sadece miktar)
+        angle = 30° (Yönü bilmez) 
 
---------------------------------------------------------------------------
+
+        4 " Hangi yöne kaç derece? " -> SIGNEDANGLE (En Yavaş / Hepsi bir arada)
+        angle = -30° (Hem miktar hem yön)
+        ------------------------------------------------------------
+
+    --------------------------------------------------------------------------
+
+            DOT = KARAR
+            ACOS = BİLGİ
+            DISTANCE = ETKİ ALANI
+            CROSS = YÖN
+
+
+
 */
 
-
-public class Dot_Vector : MonoBehaviour
+public class Dot : MonoBehaviour
 {
-
     public Transform _objA;
     public Transform _objB;
 
@@ -135,19 +150,20 @@ public class Dot_Vector : MonoBehaviour
     public float viewDistance = 10f;
 
     [Header("Precision")]
-    public float zeroThreshold = 0.001f;
+    private float zeroThreshold = 0.001f;
 
-    private float cosHalfFov; // Cache
+    private float cosHalFov; // Cache
+
 
     void Start()
     {
-        // Sabit Fov deri için cos threshold hesaplanır (1 kere)
-        cosHalfFov = Mathf.Cos(FOV * 0.5f * Mathf.Deg2Rad);
+        // Sabit Fov değeri için cos threshold hesaplanır (1 kere)
+        cosHalFov = Mathf.Cos(FOV * 0.5f * Mathf.Deg2Rad);
     }
 
     void Update()
     {
-        // _objA ve _objB boşsa altaki işlemleri yapma
+        // _objA ve _objB boşsa altaki işlemleri yap
         if (_objA == null || _objB == null) return;
 
 
@@ -155,69 +171,67 @@ public class Dot_Vector : MonoBehaviour
         Vector3 move = _objB.position - _objA.position;
 
 
-
-
-        // 2) Menzil konrolü (en ucuz işlem)
+        // 2. Menzil kontrolü (En ucuz işlem)
         if (move.sqrMagnitude > viewDistance * viewDistance)
         {
-            Debug.Log("Menzil dışında");
+            Debug.Log("Menzil dışunda");
             return;
         }
 
 
-
-
-
-        // 3) Güvenli normalize kontrolü
+        // 3. Günvenli Normalize kontrolü
         if (move.sqrMagnitude < zeroThreshold * zeroThreshold)
         {
             Debug.Log("Hedef çok yakın, yön belirsiz");
             return;
         }
 
-        //  transform.forward Unity tarafından zaten normalize gelir.
-        // Eğer kendi yön vektörünü üretirsen (örneğin velocity), manuel normalize etmelisin.
+        // transform.forward Unity tarafından normalize gelir
+        // Eğer kendi yön vektörünü üretirsen, manuel normalize etmelisin.
         Vector3 forwardA = _objA.forward;
 
-        //  Ancak directionToB manuel normalize edilmelidir
+        // Ancak directionToB manuel normalize edilmelidir
         Vector3 directionToB = move.normalized;
 
 
 
 
-
-        // 4) Dot hesaplama
+        // 4. Dot Hesaplama
         float dot = Vector3.Dot(forwardA, directionToB);
-
         Debug.Log("Dot (cosθ): " + dot);
 
 
-
-
-        // 5) Ön / Arka / Dik kontrolü (eşik ile)
+        // Ön / Arka / Dik kontrolü (eşik ile)
         if (dot > zeroThreshold)
+        {
             Debug.Log("B, A'nın önünde");
+        }
         else if (dot < -zeroThreshold)
+        {
             Debug.Log("B, A'nın arkasında");
+        }
         else
+        {
             Debug.Log("B, A'ya yaklaşık dik konumda");
+        }
 
 
-
-        // Performans dostu FOV kontrolü (ACOS kullanmadan)
-        // cosHalfFov -> Cache için start içinde 1 kere hesaplandı
-        if (dot >= cosHalfFov)
+         // Performans dostu FOV kontrolü (ACOS kullanmadan)
+          // cosHalfFov -> Cache için start içinde 1 kere hesaplandı
+          if (dot >= cosHalFov)
+          {
             Debug.Log("FOV içinde");
+        }
         else
+        {
             Debug.Log("FOV dışında");
+        }
 
 
+         // 7) Açı hesaplama (SADECE DEBUG AMAÇLI)
+         float angleDeg = Mathf.Acos(Mathf.Clamp(dot,-1,1f) * Mathf.Rad2Deg);
 
-
-        // 7) Açı hesaplama (SADECE DEBUG AMAÇLI)
-        float angleDeg = Mathf.Acos(Mathf.Clamp(dot, -1f, 1f)) * Mathf.Rad2Deg;
-
-        Debug.Log("Gerçek açı (debug): " + angleDeg);
+         Debug.Log("Gerçek açı (debug): "+ angleDeg);
     }
 
 }
