@@ -10,7 +10,7 @@ Dot Product
     Dot Nedir?
     -----------------
         Dot Product (Scaler Çarpım), iki vektör arasındaki yön ilişkisini ölçer
-        Dot = açı büyükşlüğü (cos0)
+        Dot = açı büyüklüğü (cos0)
 
             Formül:
                 Dot(a, b) = a.x*b.x + a.y*b.y + a.z*b.z  
