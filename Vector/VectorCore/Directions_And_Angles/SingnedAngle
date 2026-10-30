@@ -61,7 +61,7 @@ SignedAngle Vector
     PERFORMANS NOTU
     --------------------------------------------------------------------
 
-        SignedAngle, Angle'den çok daha pahalıdır.
+        SignedAngle, Angle'den çok daha pahalıdır UPDATE İÇİNDE DİREKT KULLANIRSAN.
         Çünkü:
             - Dot
             - Cross
